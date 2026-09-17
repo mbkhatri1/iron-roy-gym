@@ -1,0 +1,509 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Gym Management Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: dashboard
+  - name: members
+  - name: memberships
+  - name: attendance
+  - name: payments
+  - name: trainers
+  - name: expenses
+  - name: notifications
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get gym dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /members:
+    get:
+      operationId: getMembers
+      tags: [members]
+      summary: List members
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, active, expiring, expired, suspended]
+            default: all
+        - name: trainerId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Member list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Member"
+    post:
+      operationId: createMember
+      tags: [members]
+      summary: Register a member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemberInput"
+      responses:
+        "201":
+          description: Created member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+  /members/{memberId}:
+    get:
+      operationId: getMember
+      tags: [members]
+      summary: Get a member
+      parameters:
+        - $ref: "#/components/parameters/MemberId"
+      responses:
+        "200":
+          description: Member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateMember
+      tags: [members]
+      summary: Update a member
+      parameters:
+        - $ref: "#/components/parameters/MemberId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemberUpdate"
+      responses:
+        "200":
+          description: Updated member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+    delete:
+      operationId: archiveMember
+      tags: [members]
+      summary: Archive a member
+      parameters:
+        - $ref: "#/components/parameters/MemberId"
+      responses:
+        "204":
+          description: Member archived
+  /membership-plans:
+    get:
+      operationId: getMembershipPlans
+      tags: [memberships]
+      summary: List membership plans
+      responses:
+        "200":
+          description: Membership plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MembershipPlan"
+  /attendance:
+    get:
+      operationId: getAttendance
+      tags: [attendance]
+      summary: List attendance records
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: memberId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Attendance records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attendance"
+    post:
+      operationId: checkInMember
+      tags: [attendance]
+      summary: Check a member in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckInInput"
+      responses:
+        "201":
+          description: Check-in recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+  /payments:
+    get:
+      operationId: getPayments
+      tags: [payments]
+      summary: List payments
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, paid, pending, refunded]
+            default: all
+      responses:
+        "200":
+          description: Payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+    post:
+      operationId: createPayment
+      tags: [payments]
+      summary: Record a payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInput"
+      responses:
+        "201":
+          description: Payment recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+  /trainers:
+    get:
+      operationId: getTrainers
+      tags: [trainers]
+      summary: List trainers
+      responses:
+        "200":
+          description: Trainers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trainer"
+  /expenses:
+    get:
+      operationId: getExpenses
+      tags: [expenses]
+      summary: List expenses
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Record an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Expense recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: List notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+components:
+  parameters:
+    MemberId:
+      name: memberId
+      in: path
+      required: true
+      schema:
+        type: integer
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    Dashboard:
+      type: object
+      required: [gym, metrics, revenue, attendance, membershipMix, recentActivity]
+      properties:
+        gym:
+          type: object
+          required: [name, location]
+          properties:
+            name: { type: string }
+            location: { type: string }
+        metrics:
+          type: object
+          required: [totalMembers, activeMembers, expiringSoon, todaysAttendance, monthlyRevenue, pendingPayments, monthlyExpenses, netIncome, newMembers]
+          properties:
+            totalMembers: { type: integer }
+            activeMembers: { type: integer }
+            expiringSoon: { type: integer }
+            todaysAttendance: { type: integer }
+            monthlyRevenue: { type: number }
+            pendingPayments: { type: number }
+            monthlyExpenses: { type: number }
+            netIncome: { type: number }
+            newMembers: { type: integer }
+        revenue:
+          type: array
+          items:
+            $ref: "#/components/schemas/SeriesPoint"
+        attendance:
+          type: array
+          items:
+            $ref: "#/components/schemas/SeriesPoint"
+        membershipMix:
+          type: array
+          items:
+            $ref: "#/components/schemas/SeriesPoint"
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+    SeriesPoint:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: number }
+    Activity:
+      type: object
+      required: [id, type, title, description, timestamp]
+      properties:
+        id: { type: integer }
+        type: { type: string }
+        title: { type: string }
+        description: { type: string }
+        timestamp: { type: string, format: date-time }
+    Member:
+      type: object
+      required: [id, memberId, name, email, phone, planName, membershipStatus, expiryDate, joinDate, trainerName, initials]
+      properties:
+        id: { type: integer }
+        memberId: { type: string }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        dateOfBirth: { type: ["string", "null"], format: date }
+        gender: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        emergencyContact: { type: ["string", "null"] }
+        planName: { type: string }
+        membershipStatus:
+          type: string
+          enum: [active, expiring, expired, suspended, cancelled]
+        expiryDate: { type: string, format: date }
+        joinDate: { type: string, format: date }
+        trainerName: { type: ["string", "null"] }
+        avatarUrl: { type: ["string", "null"] }
+        initials: { type: string }
+        notes: { type: ["string", "null"] }
+    MemberInput:
+      type: object
+      required: [name, email, phone, planName, expiryDate]
+      properties:
+        name: { type: string, minLength: 2 }
+        email: { type: string, format: email }
+        phone: { type: string }
+        dateOfBirth: { type: ["string", "null"], format: date }
+        gender: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        emergencyContact: { type: ["string", "null"] }
+        planName: { type: string }
+        expiryDate: { type: string, format: date }
+        trainerName: { type: ["string", "null"] }
+    MemberUpdate:
+      allOf:
+        - $ref: "#/components/schemas/MemberInput"
+    MembershipPlan:
+      type: object
+      required: [id, name, duration, price, memberCount, status, color]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        duration: { type: string }
+        price: { type: number }
+        memberCount: { type: integer }
+        status: { type: string, enum: [active, inactive] }
+        color: { type: string }
+    Attendance:
+      type: object
+      required: [id, memberId, memberName, memberCode, date, time, status, method]
+      properties:
+        id: { type: integer }
+        memberId: { type: integer }
+        memberName: { type: string }
+        memberCode: { type: string }
+        date: { type: string, format: date }
+        time: { type: string }
+        status: { type: string, enum: [checked-in, checked-out] }
+        method: { type: string, enum: [search, qr] }
+    CheckInInput:
+      type: object
+      required: [memberId]
+      properties:
+        memberId: { type: integer }
+        method: { type: string, enum: [search, qr], default: search }
+    Payment:
+      type: object
+      required: [id, receiptNumber, memberName, memberCode, amount, method, status, date, planName]
+      properties:
+        id: { type: integer }
+        receiptNumber: { type: string }
+        memberName: { type: string }
+        memberCode: { type: string }
+        amount: { type: number }
+        method: { type: string, enum: [cash, card, transfer, online] }
+        status: { type: string, enum: [paid, pending, refunded] }
+        date: { type: string, format: date }
+        planName: { type: string }
+        discount: { type: number }
+    PaymentInput:
+      type: object
+      required: [memberId, amount, method, planName]
+      properties:
+        memberId: { type: integer }
+        amount: { type: number, minimum: 0 }
+        method: { type: string, enum: [cash, card, transfer, online] }
+        planName: { type: string }
+        discount: { type: number, minimum: 0 }
+    Trainer:
+      type: object
+      required: [id, name, specialization, memberCount, status, initials, phone, email]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        specialization: { type: string }
+        memberCount: { type: integer }
+        status: { type: string, enum: [active, on-leave, inactive] }
+        initials: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        schedule: { type: string }
+    Expense:
+      type: object
+      required: [id, name, category, amount, date, method]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+        amount: { type: number }
+        date: { type: string, format: date }
+        method: { type: string }
+        description: { type: ["string", "null"] }
+    ExpenseInput:
+      type: object
+      required: [name, category, amount, method]
+      properties:
+        name: { type: string }
+        category: { type: string }
+        amount: { type: number, minimum: 0 }
+        method: { type: string }
+        description: { type: ["string", "null"] }
+    Notification:
+      type: object
+      required: [id, title, description, type, createdAt, read]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [member, payment, expiring, alert] }
+        createdAt: { type: string, format: date-time }
+        read: { type: boolean }

@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "1:1"
+previewPath = "/iron-roy-gym-demo/"
+title = "Iron Roy Gym Demo Video"
+description = "A short square product demo video introducing Iron Roy Gym software through its landing page, dashboard, member management, attendance, payments, and reporting workflows."
+version = "1.0.0"
+id = "artifacts/iron-roy-gym-demo"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/iron-roy-gym-demo/" ]
+localPort = 20242
+
+[services.development]
+run = "pnpm --filter @workspace/iron-roy-gym-demo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/iron-roy-gym-demo", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/iron-roy-gym-demo/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20242"
+BASE_PATH = "/iron-roy-gym-demo/"
