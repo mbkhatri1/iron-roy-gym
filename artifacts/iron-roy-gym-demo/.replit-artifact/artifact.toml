@@ -13,10 +13,10 @@ paths = [ "/iron-roy-gym-demo/" ]
 localPort = 20242
 
 [services.development]
-run = "pnpm --filter @workspace/iron-roy-gym-demo run dev"
+run = "corepack pnpm --filter @workspace/iron-roy-gym-demo run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/iron-roy-gym-demo", "run", "build" ]
+build = [ "corepack", "pnpm", "--filter", "@workspace/iron-roy-gym-demo", "run", "build" ]
 serve = "static"
 publicDir = "artifacts/iron-roy-gym-demo/dist/public"
 
