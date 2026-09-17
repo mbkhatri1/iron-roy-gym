@@ -12,10 +12,10 @@ paths = [ "/" ]
 localPort = 24596
 
 [services.development]
-run = "pnpm --filter @workspace/gym-management run dev"
+run = "corepack pnpm --filter @workspace/gym-management run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/gym-management", "run", "build" ]
+build = [ "corepack", "pnpm", "--filter", "@workspace/gym-management", "run", "build" ]
 serve = "static"
 publicDir = "artifacts/gym-management/dist/public"
 
